@@ -63,6 +63,24 @@ const useAdminStore = create((set, get) => ({
     dashboard: null,
     charts: null,
     realTime: null,
+    profile: null,
+  },
+
+  // Admin Profile Data
+  adminProfile: {
+    _id: null,
+    username: "",
+    phone: "",
+    email: "",
+    role: "",
+    createdAt: null,
+    updatedAt: null,
+  },
+
+  // Profile Loading States
+  profileLoading: {
+    fetch: false,
+    update: false,
   },
 
   // Actions
@@ -78,8 +96,93 @@ const useAdminStore = create((set, get) => ({
         dashboard: null,
         charts: null,
         realTime: null,
+        profile: null,
       },
     });
+  },
+
+  // Profile Management Functions
+  fetchAdminProfile: async () => {
+    set((state) => ({
+      profileLoading: { ...state.profileLoading, fetch: true },
+      errors: { ...state.errors, profile: null },
+    }));
+
+    try {
+      console.log("Fetching admin profile...");
+
+      const response = await fetch(`${API_BASE_URL}/admin/profile`, {
+        headers: createAuthHeaders(),
+      });
+
+      console.log("Profile response status:", response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Profile response error:", errorText);
+        throw new Error(
+          `HTTP error! status: ${response.status} - ${errorText}`
+        );
+      }
+
+      const data = await response.json();
+      console.log("Profile data received:", data);
+
+      set({
+        adminProfile: data.admin,
+        profileLoading: { ...get().profileLoading, fetch: false },
+      });
+    } catch (error) {
+      console.error("Error fetching admin profile:", error);
+      set((state) => ({
+        errors: { ...state.errors, profile: error.message },
+        profileLoading: { ...state.profileLoading, fetch: false },
+      }));
+    }
+  },
+
+  updateAdminProfile: async (profileData) => {
+    set((state) => ({
+      profileLoading: { ...state.profileLoading, update: true },
+      errors: { ...state.errors, profile: null },
+    }));
+
+    try {
+      console.log("Updating admin profile...", profileData);
+
+      const response = await fetch(`${API_BASE_URL}/admin/profile`, {
+        method: "PATCH",
+        headers: createAuthHeaders(),
+        body: JSON.stringify(profileData),
+      });
+
+      console.log("Profile update response status:", response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Profile update response error:", errorText);
+        throw new Error(
+          `HTTP error! status: ${response.status} - ${errorText}`
+        );
+      }
+
+      const data = await response.json();
+      console.log("Profile update data received:", data);
+
+      set({
+        adminProfile: data.admin,
+        profileLoading: { ...get().profileLoading, update: false },
+      });
+
+      return { success: true, message: data.message };
+    } catch (error) {
+      console.error("Error updating admin profile:", error);
+      set((state) => ({
+        errors: { ...state.errors, profile: error.message },
+        profileLoading: { ...state.profileLoading, update: false },
+      }));
+      return { success: false, message: error.message };
+    }
   },
 
   // Fetch Dashboard Data

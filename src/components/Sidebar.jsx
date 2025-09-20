@@ -117,6 +117,14 @@ const Sidebar = () => {
         {/* User Menu Dropdown */}
         {showUserMenu && (
           <div className="absolute bottom-full left-0 right-0 mb-2 bg-gray-700 rounded-lg shadow-lg overflow-hidden">
+            <Link
+              to="/profile"
+              className="flex items-center w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 hover:text-white transition-colors"
+              onClick={() => setShowUserMenu(false)}
+            >
+              <MdSettings className="mr-2" />
+              Edit Profile
+            </Link>
             <button
               onClick={handleLogout}
               className="flex items-center w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 hover:text-white transition-colors"

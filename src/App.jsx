@@ -14,10 +14,14 @@ import Sidebar from "./components/Sidebar";
 import Users from "./pages/Users";
 import UserDetail from "./pages/UserDetail";
 import Login from "./pages/Auth/login";
+import ForgotPassword from "./pages/Auth/ForgotPassword";
+import VerifyCode from "./pages/Auth/VerifyCode";
+import ResetPassword from "./pages/Auth/ResetPassword";
 import Bots from "./pages/Bots";
 import GameSettings from "./pages/GameSettings";
 import Ads from "./pages/Ads";
 import PendingWithdrawals from "./pages/PendingWithdrawals";
+import EditProfile from "./pages/EditProfile";
 
 function AppContent() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -51,12 +55,20 @@ function AppContent() {
     return children;
   };
 
+  // Check if current path is an auth page (no sidebar needed)
+  const isAuthPage = [
+    "/auth",
+    "/forgot-password",
+    "/verify-code",
+    "/reset-password",
+  ].includes(location.pathname);
+
   return (
     <div className="flex min-h-screen">
-      {isAuthenticated && location.pathname !== "/auth" && <Sidebar />}
+      {isAuthenticated && !isAuthPage && <Sidebar />}
       <main
         className={`flex-1 transition-all duration-300 ease-in-out p-6 ${
-          isAuthenticated && location.pathname !== "/auth"
+          isAuthenticated && !isAuthPage
             ? isSidebarCollapsed
               ? "ml-16"
               : "ml-64"
@@ -68,6 +80,9 @@ function AppContent() {
             path="/auth"
             element={<Login setIsAuthenticated={setIsAuthenticated} />}
           />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/verify-code" element={<VerifyCode />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route
             path="/"
             element={
@@ -137,6 +152,14 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <PendingWithdrawals />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <EditProfile />
               </ProtectedRoute>
             }
           />
