@@ -430,10 +430,12 @@ const Dashboard = () => {
 
     try {
       setSendingNotification(true);
+      const token = localStorage.getItem("token");
       const response = await fetch(`${API_URL}/admin/send-notification`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           message: notificationMessage, // Don't trim here to preserve line breaks
