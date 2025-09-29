@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Bot,
   Gamepad2,
@@ -141,8 +141,10 @@ const Bots = () => {
     return new Date(dateString).toLocaleDateString();
   };
 
-  // Calculate comprehensive bot analysis
-  const calculateBotAnalysis = () => {
+  // Calculate comprehensive bot analysis - memoized for performance
+  const botAnalysis = useMemo(() => {
+    console.log("Recalculating bot analysis with", botGames.length, "games");
+
     const analysis = {
       totalGames: botGames.length,
       gamesWon: 0,
@@ -156,8 +158,8 @@ const Bots = () => {
     };
 
     botGames.forEach((game) => {
-      const totalStake = game.stake || 0;
-      analysis.totalStake += totalStake;
+      const gameStake = game.stake || 0;
+      analysis.totalStake += gameStake;
 
       if (game.status === "finished" && game.winnerId) {
         // Check if winner is a bot
@@ -166,23 +168,30 @@ const Bots = () => {
 
         if (isBotWinner) {
           analysis.gamesWon++;
-          analysis.moneyWon += totalStake;
+          // Bot wins the total prize pool (stake * number of players)
+          const prizePool = gameStake * (game.players?.length || 1);
+          analysis.moneyWon += prizePool;
         } else {
           analysis.gamesLost++;
-          analysis.moneyLost += totalStake;
+          // Bot loses its stake
+          analysis.moneyLost += gameStake;
         }
       }
     });
 
     analysis.netProfit = analysis.moneyWon - analysis.moneyLost;
+
+    // Calculate accuracy based on finished games only
+    const finishedGames = analysis.gamesWon + analysis.gamesLost;
     analysis.accuracy =
-      analysis.totalGames > 0
-        ? ((analysis.gamesWon / analysis.totalGames) * 100).toFixed(1)
+      finishedGames > 0
+        ? ((analysis.gamesWon / finishedGames) * 100).toFixed(1)
         : 0;
     analysis.profitable = analysis.netProfit > 0;
 
+    console.log("Bot analysis result:", analysis);
     return analysis;
-  };
+  }, [botGames]);
 
   // Get winner display name
   const getWinnerDisplay = (game) => {
@@ -344,7 +353,7 @@ const Bots = () => {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Games</p>
               <p className="text-2xl font-bold text-gray-900">
-                {calculateBotAnalysis().totalGames}
+                {botAnalysis.totalGames}
               </p>
             </div>
           </div>
@@ -358,10 +367,10 @@ const Bots = () => {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Games Won</p>
               <p className="text-2xl font-bold text-gray-900">
-                {calculateBotAnalysis().gamesWon}
+                {botAnalysis.gamesWon}
               </p>
               <p className="text-xs text-gray-500">
-                Lost: {calculateBotAnalysis().gamesLost}
+                Lost: {botAnalysis.gamesLost}
               </p>
             </div>
           </div>
@@ -376,15 +385,13 @@ const Bots = () => {
               <p className="text-sm font-medium text-gray-600">Net Profit</p>
               <p
                 className={`text-2xl font-bold ${
-                  calculateBotAnalysis().profitable
-                    ? "text-green-600"
-                    : "text-red-600"
+                  botAnalysis.profitable ? "text-green-600" : "text-red-600"
                 }`}
               >
-                ${calculateBotAnalysis().netProfit.toLocaleString()}
+                ${botAnalysis.netProfit.toLocaleString()}
               </p>
               <p className="text-xs text-gray-500">
-                Won: ${calculateBotAnalysis().moneyWon.toLocaleString()}
+                Won: ${botAnalysis.moneyWon.toLocaleString()}
               </p>
             </div>
           </div>
@@ -398,18 +405,14 @@ const Bots = () => {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Accuracy</p>
               <p className="text-2xl font-bold text-gray-900">
-                {calculateBotAnalysis().accuracy}%
+                {botAnalysis.accuracy}%
               </p>
               <p
                 className={`text-xs font-medium ${
-                  calculateBotAnalysis().profitable
-                    ? "text-green-600"
-                    : "text-red-600"
+                  botAnalysis.profitable ? "text-green-600" : "text-red-600"
                 }`}
               >
-                {calculateBotAnalysis().profitable
-                  ? "Profitable"
-                  : "Not Profitable"}
+                {botAnalysis.profitable ? "Profitable" : "Not Profitable"}
               </p>
             </div>
           </div>
@@ -426,7 +429,7 @@ const Bots = () => {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Stakes</p>
               <p className="text-2xl font-bold text-gray-900">
-                ${calculateBotAnalysis().totalStake.toLocaleString()}
+                ${botAnalysis.totalStake.toLocaleString()}
               </p>
             </div>
           </div>
@@ -440,7 +443,7 @@ const Bots = () => {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Money Lost</p>
               <p className="text-2xl font-bold text-gray-900">
-                ${calculateBotAnalysis().moneyLost.toLocaleString()}
+                ${botAnalysis.moneyLost.toLocaleString()}
               </p>
             </div>
           </div>
