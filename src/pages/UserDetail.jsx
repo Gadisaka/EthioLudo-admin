@@ -18,6 +18,20 @@ import {
 import { useUserStore } from "../Store";
 import { API_URL } from "../../constants";
 
+// Helper function to get auth token
+const getAuthToken = () => {
+  return localStorage.getItem("token");
+};
+
+// Helper function to create headers with auth token
+const createAuthHeaders = () => {
+  const token = getAuthToken();
+  return {
+    "Content-Type": "application/json",
+    ...(token && { Authorization: `Bearer ${token}` }),
+  };
+};
+
 const UserDetail = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
@@ -52,9 +66,7 @@ const UserDetail = () => {
         // If not in store, fetch from API
         const response = await fetch(`${API_URL}/admin/users`, {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: createAuthHeaders(),
         });
         if (!response.ok) {
           if (response.status === 401) {
@@ -89,9 +101,7 @@ const UserDetail = () => {
 
       const response = await fetch(`${API_URL}/admin/users/${userId}/status`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: createAuthHeaders(),
         body: JSON.stringify({ isActive: editStatus }),
       });
 
@@ -131,9 +141,7 @@ const UserDetail = () => {
 
       const response = await fetch(`${API_URL}/admin/users/${userId}`, {
         method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: createAuthHeaders(),
       });
 
       if (!response.ok) {

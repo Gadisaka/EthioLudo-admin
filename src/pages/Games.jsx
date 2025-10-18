@@ -36,6 +36,27 @@ const Games = () => {
     fetchGames();
   }, [fetchGames]);
 
+  // Helper function to check if a player is a bot
+  const isBot = (player) => {
+    return (
+      player.isBot === true ||
+      player.username?.toLowerCase().includes("bot") ||
+      player.name?.toLowerCase().includes("bot") ||
+      player.username?.toLowerCase().includes("ai") ||
+      player.name?.toLowerCase().includes("ai") ||
+      player.username?.toLowerCase().includes("computer") ||
+      player.name?.toLowerCase().includes("computer") ||
+      player.username?.toLowerCase().includes("auto") ||
+      player.name?.toLowerCase().includes("auto")
+    );
+  };
+
+  // Helper function to count bots in a game
+  const getBotCount = (players) => {
+    if (!Array.isArray(players)) return 0;
+    return players.filter(isBot).length;
+  };
+
   // Pagination calculations
   const totalPages = Math.ceil(games.length / itemsPerPage);
 
@@ -166,27 +187,6 @@ const Games = () => {
 
   const getGameTypeLabel = (requiredPieces) => {
     return `Kings ${requiredPieces}`;
-  };
-
-  // Helper function to check if a player is a bot
-  const isBot = (player) => {
-    return (
-      player.isBot === true ||
-      player.username?.toLowerCase().includes("bot") ||
-      player.name?.toLowerCase().includes("bot") ||
-      player.username?.toLowerCase().includes("ai") ||
-      player.name?.toLowerCase().includes("ai") ||
-      player.username?.toLowerCase().includes("computer") ||
-      player.name?.toLowerCase().includes("computer") ||
-      player.username?.toLowerCase().includes("auto") ||
-      player.name?.toLowerCase().includes("auto")
-    );
-  };
-
-  // Helper function to count bots in a game
-  const getBotCount = (players) => {
-    if (!Array.isArray(players)) return 0;
-    return players.filter(isBot).length;
   };
 
   if (loading.games) {
