@@ -661,7 +661,7 @@ const Ads = () => {
           </div>
         </div>
 
-        <div>
+        {/* <div>
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             EthioGames Homepage Ads
           </h2>
@@ -672,7 +672,7 @@ const Ads = () => {
               true
             )}
           </div>
-        </div>
+        </div> */}
 
         {/* Social Links Section */}
         <div>
